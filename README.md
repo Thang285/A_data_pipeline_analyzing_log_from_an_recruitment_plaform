@@ -56,4 +56,10 @@ root
 - Do some basic calculations for further in-dept analysis
 - Store processed data into MySQL
 - use Airflow to monitor and automate spark job
-- 
+
+### Change data capture: Timestamp-based 
+Change data capture is used to sync the downstream system with changes that have been made in the source system
+
+This pipeline designs uses CDC to recognize the newest records in Cassandra and then trigger spark jobs to process and load that records to MySQL for further in-depth analysis
+
+
