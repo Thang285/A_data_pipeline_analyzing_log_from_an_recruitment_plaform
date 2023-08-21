@@ -6,7 +6,7 @@ A recruitment platform deals with massive amount of user's interaction logs dail
 ### Technology used
 - Pyspark
 - Kafka
-- Airflow
+- Airflow (have yet to be deployed due to technology issues)
 - Grafana
 - Docker
 - Python
