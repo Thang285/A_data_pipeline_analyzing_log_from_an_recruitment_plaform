@@ -57,9 +57,31 @@ root
 - Store processed data into MySQL
 - use Airflow to monitor and automate spark job
 
+### Processed data 
+```sh
+root
+ |-- job_id: integer (nullable = true)
+ |-- dates: timestamp (nullable = true)
+ |-- hours: integer (nullable = true)
+ |-- disqualified_application: integer (nullable = true)
+ |-- qualified_application: integer (nullable = true)
+ |-- conversion: integer (nullable = true)
+ |-- company_id: integer (nullable = true)
+ |-- group_id: integer (nullable = true)
+ |-- campaign_id: integer (nullable = true)
+ |-- publisher_id: integer (nullable = true)
+ |-- bid_set: double (nullable = true)
+ |-- clicks: integer (nullable = true)
+ |-- impressions: string (nullable = true)
+ |-- spend_hour: double (nullable = true)
+ |-- sources: string (nullable = true)
+ |-- latest_update_time: timestamp (nullable = true)
+```
 ### Change data capture: Timestamp-based 
 Change data capture is used to sync the downstream system with changes that have been made in the source system
 
 This pipeline designs uses CDC to recognize the newest records in Cassandra and then trigger spark jobs to process and load that records to MySQL for further in-depth analysis
+### Visualization with Grafana
+![image](https://github.com/Thang285/A_near_realtime_data_pipeline_analyzing_log_from_an_recruitment_platform/assets/116457922/5e6a0222-74e4-4ca5-ba47-e54a19bfb713)
 
 
