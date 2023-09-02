@@ -10,6 +10,7 @@ A recruitment platform deals with massive amount of user's interaction logs dail
 - Grafana
 - Docker
 - Python
+- Linux
 
 ## Architecture
 ![image](https://github.com/Thang285/A_near_realtime_data_pipeline_analyzing_log_from_an_recruitment_plaform/assets/116457922/b07af45b-514f-4ed9-9276-a5cb849a6ea7)
