@@ -6,7 +6,7 @@ A recruitment platform deals with massive amount of user's interaction logs dail
 ### Technology used
 - Pyspark
 - Kafka
-- Airflow (have yet to be deployed due to hardware issues)
+- Airflow 
 - Grafana
 - Docker
 - Python
@@ -82,6 +82,10 @@ root
 Change data capture is used to sync the downstream system with changes that have been made in the source system
 
 This pipeline designs uses CDC to recognize the newest records in Cassandra and then trigger spark jobs to process and load that records to MySQL for further in-depth analysis
+
+### Airflow
+All tasks use BashOperator for execution and are set to run every day at 7:AM
+
 ### Visualization with Grafana
 ![image](https://github.com/Thang285/A_near_realtime_data_pipeline_analyzing_log_from_an_recruitment_platform/assets/116457922/5e6a0222-74e4-4ca5-ba47-e54a19bfb713)
 
