@@ -13,7 +13,7 @@ A recruitment platform deals with massive amount of user's interaction logs dail
 - Linux
 
 ## Architecture
-![image](https://github.com/Thang285/A_near_realtime_data_pipeline_analyzing_log_from_an_recruitment_plaform/assets/116457922/b07af45b-514f-4ed9-9276-a5cb849a6ea7)
+![image](https://github.com/Thang285/A_near_realtime_data_pipeline_analyzing_log_from_an_recruitment_platform/assets/116457922/e04bbc20-b85a-479f-9cf9-a3ebb617072a)
 
 ### Log data
 Raw log data from webites is stored in Cassandra then processed with Spark. Processed data is finalized with data from MySQL and would be stored in MySQL. After that, Grafana would take data from MySQL to generate dashboards
