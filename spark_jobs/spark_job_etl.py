@@ -11,6 +11,7 @@ from pyspark.sql import Row
 from pyspark.sql.functions import *
 from pyspark.sql.window import Window as W
 import mysql.connector
+from kafka import KafkaProducer
 
 def calculating_clicks(df):
     clicks_data = df.filter(df.custom_track == 'click')
@@ -76,22 +77,11 @@ def retrieve_company_data():
     company = spark.read.format('jdbc').options(url=URL, driver=DRIVER, dbtable=sql, user=USER, password=PASSWORD).load()
     return company 
     
-def import_to_mysql(output):
-    final_output = output.select('job_id','date','hour','unqualified','qualified','conversions','company_id','group_id','campaign_id','publisher_id','bid_set','clicks','spend_hour','ts')
-    final_output = final_output.withColumnRenamed('date','dates').withColumnRenamed('hour','hours').withColumnRenamed('qualified','qualified_application').\
-    withColumnRenamed('unqualified','disqualified_application').withColumnRenamed('conversions','conversion')
-    final_output = final_output.withColumn('sources',lit('Cassandra'))
-    final_output = final_output.withColumnRenamed('ts','latest_update_time')
-    final_output.printSchema()
-    final_output.write.format("jdbc") \
-                    .option("driver",DRIVER) \
-                    .option("url", URL) \
-                    .option("dbtable", "final") \
-                    .mode("append") \
-                    .option("user", USER) \
-                    .option("password", PASSWORD) \
-                    .save()
+def import_to_kafka(output):
+    output.selectExpr("CAST(job_id AS STRING) AS key", "to_json(struct(*)) AS value") \
+    .write.format("kafka").option("kafka.bootstrap.servers", "192.168.64.1:9092").option("topic", "json_data").save()
     return print('Data imported successfully')
+
 def get_mysql_latest_time():    
     sql = """(select max(latest_update_time) from final) data"""
     mysql_time = spark.read.format('jdbc').options(url=URL, driver=DRIVER, dbtable=sql, user=USER, password=PASSWORD).load()
@@ -132,7 +122,7 @@ def main_task(mysql_time):
     print('-----------------------------')
     print('Import Output to MySQL')
     print('-----------------------------')
-    import_to_mysql(final_output)
+    import_to_kafka(final_output)
     return print('Task Finished')
 
 if __name__ == "__main__":
