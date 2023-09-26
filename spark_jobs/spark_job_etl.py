@@ -120,7 +120,7 @@ def main_task(mysql_time):
     print('-----------------------------')
     final_output = cassandra_output.join(company,'job_id','left').drop(company.group_id).drop(company.campaign_id)
     print('-----------------------------')
-    print('Import Output to MySQL')
+    print('Import Output to Kafka')
     print('-----------------------------')
     import_to_kafka(final_output)
     return print('Task Finished')
