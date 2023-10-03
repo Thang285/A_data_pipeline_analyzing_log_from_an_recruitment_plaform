@@ -79,7 +79,7 @@ def retrieve_company_data():
     
 def import_to_kafka(output):
     output.selectExpr("CAST(job_id AS STRING) AS key", "to_json(struct(*)) AS value") \
-    .write.format("kafka").option("kafka.bootstrap.servers", "192.168.64.1:9092").option("topic", "json_data").save()
+    .write.format("kafka").option("kafka.bootstrap.servers", "localhost:9092").option("topic", "json_data").save()
     return print('Data imported successfully')
 
 def get_mysql_latest_time():    
