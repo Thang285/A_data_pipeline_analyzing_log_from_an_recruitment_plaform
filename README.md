@@ -78,6 +78,8 @@ root
  |-- sources: string (nullable = true)
  |-- latest_update_time: timestamp (nullable = true)
 ```
+### Kafka connect: JDBC Sink
+Kafka Connect ensures secure, low-latency data flow to MySQL, minimizing the need for extensive code and safeguarding data integrity.
 ### Change data capture: Timestamp-based 
 Change data capture is used to sync the downstream system with changes that have been made in the source system
 
