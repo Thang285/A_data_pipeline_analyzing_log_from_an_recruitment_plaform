@@ -1,6 +1,4 @@
----
-version: '2'
-name: test
+version: '3.8'
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.0
@@ -33,15 +31,9 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_JMX_PORT: 9101
       KAFKA_JMX_HOSTNAME: localhost
-    command:
-      - "bash"
-      - "-c"
-      - |
-        /etc/confluent/docker/run &
-        sleep 10
-        /usr/bin/kafka-topics --create --bootstrap-server broker:29092 --replication-factor 1 --partitions 1 --topic json_data --if-not-exists
-        /usr/bin/kafka-topics --create --bootstrap-server broker:29092 --replication-factor 1 --partitions 1 --topic avro_data --if-not-exists
-        sleep infinity
+    volumes:
+      - ./scripts/broker_setup.sh:/scripts/broker_setup.sh
+    command: ["/bin/bash", "-c", "/scripts/broker_setup.sh"]
 
   schema-registry:
     image: confluentinc/cp-schema-registry:7.4.0
@@ -84,22 +76,11 @@ services:
       CONNECT_LOG4J_LOGGERS: org.apache.zookeeper=ERROR,org.I0Itec.zkclient=ERROR,org.reflections=ERROR
       CONNECT_LISTENERS: "http://:28082"
     volumes:
+      - ./scripts/connect_setup.sh:/scripts/connect_setup.sh
       - ./Kafka/jdbc_sink_config.properties:/etc/kafka/jdbc_sink_config.properties
       - ./Kafka/connect-avro-standalone.properties:/etc/schema-registry/connect-avro-standalone.properties
-    command: 
-      - bash 
-      - -c 
-      - |
-        /etc/confluent/docker/run & 
-        confluent-hub install --no-prompt confluentinc/kafka-connect-jdbc:10.7.4
-        sleep 10
-        cd /usr/share/confluent-hub-components/confluentinc-kafka-connect-jdbc
-        mkdir jar_file
-        cd jar_file
-        wget -nc https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.30/mysql-connector-java-8.0.30.jar
-        sleep 60
-        /usr/bin/connect-standalone /etc/schema-registry/connect-avro-standalone.properties /etc/kafka/jdbc_sink_config.properties
-        sleep infinity
+    command: ["/bin/bash", "-c", "/scripts/connect_setup.sh"]
+
   ksqldb-server:
     image: confluentinc/cp-ksqldb-server:7.4.0
     hostname: ksqldb-server
@@ -120,19 +101,9 @@ services:
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_REPLICATION_FACTOR: 1
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: 'true'
       KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: 'true'
-    command:
-      - "bash"
-      - "-c"
-      - |
-        /etc/confluent/docker/run &
-        sleep 30
-        ksql http://ksqldb-server:8088 <<EOF
-        CREATE STREAM source (job_id FLOAT, date DATE, hour FLOAT, publisher_id FLOAT, campaign_id FLOAT, group_id FLOAT, ts TIMESTAMP, bid_set FLOAT, clicks FLOAT, spend_hour FLOAT, conversions FLOAT, qualified FLOAT, unqualified FLOAT, company_id FLOAT) WITH ( KAFKA_TOPIC = 'json_data', VALUE_FORMAT = 'JSON');
-        SET 'auto.offset.reset' = 'earliest';
-        CREATE STREAM target_avro WITH (VALUE_FORMAT='AVRO', KAFKA_TOPIC='avro_data') AS SELECT * FROM source;
-        exit
-        EOF
-        sleep infinity
+    volumes:
+      - ./scripts/ksqldb_setup.sh:/scripts/ksqldb_setup.sh
+    command: ["/bin/bash", "-c", "/scripts/ksqldb_setup.sh"]
 
   mysql:
     image: mysql:latest
@@ -162,5 +133,37 @@ services:
     volumes:
       - ./grafana:/var/lib/grafana
       
+  pyspark:
+    image: bitnami/spark:latest
+    hostname: pyspark
+    container_name: pyspark
+    depends_on:
+      - mysql
+      - cassandra
+    environment:
+      SPARK_MODE: master
+    ports:
+      - "8080:8080"
+    command: ["/opt/bitnami/scripts/spark/entrypoint.sh"]
+
+  airflow:
+    image: apache/airflow:latest
+    hostname: airflow
+    container_name: airflow
+    depends_on:
+      - broker
+      - connect
+      - ksqldb-server
+    environment:
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__EXECUTOR: "LocalExecutor"
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: "sqlite:////root/airflow/airflow.db"
+    volumes:
+      - ./airflow:/root/airflow
+    ports:
+      - "8085:8080"
+    command: ["airflow", "standalone"]
+      
 volumes:
   grafana: {}
+  airflow: {}
