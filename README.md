@@ -3,7 +3,7 @@
 ## Introduction
 A recruitment platform deals with massive amount of user's interaction logs daily, the company is interested in finding insights from candidates activities for their buisiness development. This project is born to handle that in a near real-time manner.
 
-### Technology used
+### Technology Used
 - Pyspark
 - Kafka
 - Airflow 
@@ -15,7 +15,7 @@ A recruitment platform deals with massive amount of user's interaction logs dail
 ## Architecture
 ![image](https://github.com/Thang285/A_near_realtime_data_pipeline_analyzing_log_from_an_recruitment_platform/assets/116457922/e04bbc20-b85a-479f-9cf9-a3ebb617072a)
 
-### Log data
+### Log Data
 Raw log data from webites is stored in Cassandra then processed with Spark. Processed data is finalized with data from MySQL and would be stored in MySQL. After that, Grafana would take data from MySQL to generate dashboards.
 Initially, Log data contains:
 ```sh
@@ -51,14 +51,14 @@ root
  |-- v: integer (nullable = true)
  |-- vp: string (nullable = true)
 ```
-### Processing data 
+### Processing Data 
 - Scrutinize log data and select useful information such as ```["create_time"]``` , ```["bid"]```, ```["custom_track"]```, ```["campaign_id"]```, ```["job_id"]```, ```["publisher_id"]```, ```["ts"]```
 - Replace null values with 0
 - Do some basic calculations for further in-dept analysis
 - Store processed data into MySQL
 - use Airflow to monitor and automate spark job
 
-### Processed data 
+### Processed Data 
 ```sh
 root
  |-- job_id: integer (nullable = true)
@@ -78,9 +78,9 @@ root
  |-- sources: string (nullable = true)
  |-- latest_update_time: timestamp (nullable = true)
 ```
-### Kafka connect: JDBC Sink
+### Kafka Connect: JDBC Sink
 Kafka Connect ensures secure, low-latency data flow to MySQL, minimizing the need for extensive code and safeguarding data integrity.
-### Change data capture: Timestamp-based 
+### Change Data Capture: Timestamp-Based 
 Change data capture is used to sync the downstream system with changes that have been made in the source system
 
 This pipeline designs uses CDC to recognize the newest records in Cassandra and then trigger spark jobs to process and load that records to MySQL for further in-depth analysis
